@@ -1,0 +1,37 @@
+# Replaces GitHub's built-in Pages pipeline, whose deploy step aborts after a hardcoded
+# 10 minutes ("Timeout reached, aborting!") when their deployment queue is backed up.
+# The build itself takes ~11s; only the queue wait is the problem, so we wait longer.
+name: Deploy staging build to Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          timeout: 2700000        # 45 min instead of the default 10
+          error_count: 20
+          reporting_interval: 15000
