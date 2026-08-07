@@ -120,7 +120,7 @@
       // Build filenames never change between deploys, so browsers happily serve a stale wasm
       // from cache and you end up debugging code that is not running. Version-stamp every
       // payload URL so a new build is always fetched fresh.
-      var BUILD_V = "1.0-20260806122548";
+      var BUILD_V = "1.0-20260807115902";
       function v(u) { return u + (u.indexOf("?") < 0 ? "?" : "&") + "v=" + encodeURIComponent(BUILD_V); }
 
       var loaderUrl = v(buildUrl + "/stagingbuild.loader.js");
