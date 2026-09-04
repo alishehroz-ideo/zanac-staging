@@ -17,10 +17,15 @@
         overflow: hidden; background: #0e0e12;
       }
 
-      /* Full-viewport shell. Solid dark = clean loading backdrop + clean letterbox bars. */
+      /* Full-viewport shell. The game's own key art, blurred and darkened, sits behind the
+         loading icon and bar so a player can tell what is loading; #0e0e12 stays underneath as
+         the fallback if the JPG is slow, and it is also what paints the letterbox bars. It must
+         stay identical to GROUND in Tools/bake_loading_bg.py.
+         cover, never 100% 100%: cover crops, stretch distorts, and portrait art stretched into a
+         wide letterboxed viewport looks broken. */
       #unity-container {
         position: fixed; inset: 0;
-        background: #0e0e12;
+        background: #0e0e12 url('TemplateData/loading-bg.jpg') center / cover no-repeat;
       }
 
       /* Canvas is positioned by JS (letterbox). Must be TRANSPARENT so the backdrop shows
@@ -116,7 +121,7 @@
       // Deliberately fire-and-forget. Nothing below awaits it, so the Unity download is
       // never delayed by this request.
       (function loadTenantIcon() {
-        var DEFAULT_API_BASE = "https://api.staging.g-b.store";   // staging
+        var DEFAULT_API_BASE = "https://api.g-b.store";   // production
         var DEFAULT_GAME_ID  = "ZANAC";
         var FETCH_TIMEOUT_MS = 4000;
 
@@ -237,7 +242,7 @@
       // Build filenames never change between deploys, so browsers happily serve a stale wasm
       // from cache and you end up debugging code that is not running. Version-stamp every
       // payload URL so a new build is always fetched fresh.
-      var BUILD_V = "1.0-20260811-1449";
+      var BUILD_V = "1.0-20260904102755";
       function v(u) { return u + (u.indexOf("?") < 0 ? "?" : "&") + "v=" + encodeURIComponent(BUILD_V); }
 
       var loaderUrl = v(buildUrl + "/stagingbuild.loader.js");
