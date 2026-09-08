@@ -19,10 +19,16 @@
 
       /* Full-viewport shell. The game's own key art, blurred and darkened, sits behind the
          loading icon and bar so a player can tell what is loading; #0e0e12 stays underneath as
-         the fallback if the JPG is slow, and it is also what paints the letterbox bars. It must
+         the fallback if the JPG is slow, and it is also what paints the LETTERBOX BARS. It must
          stay identical to GROUND in Tools/bake_loading_bg.py.
          cover, never 100% 100%: cover crops, stretch distorts, and portrait art stretched into a
-         wide letterboxed viewport looks broken. */
+         wide letterboxed viewport looks broken.
+
+         THIS IS HALF THE CHANGE. Because this element paints the letterbox bars, the image has to
+         be TAKEN BACK OFF when the game starts, or a band of blurred art sits above and below the
+         game for the entire session. The teardown is in the createUnityInstance().then() handler
+         beside the killEl() calls — search for container.style.background. The two are forty lines
+         and one language apart, which is exactly how they got separated in the first place. */
       #unity-container {
         position: fixed; inset: 0;
         background: #0e0e12 url('TemplateData/loading-bg.jpg') center / cover no-repeat;
@@ -242,7 +248,7 @@
       // Build filenames never change between deploys, so browsers happily serve a stale wasm
       // from cache and you end up debugging code that is not running. Version-stamp every
       // payload URL so a new build is always fetched fresh.
-      var BUILD_V = "1.0-20260904125758";
+      var BUILD_V = "1.0-20260908080110";
       function v(u) { return u + (u.indexOf("?") < 0 ? "?" : "&") + "v=" + encodeURIComponent(BUILD_V); }
 
       var loaderUrl = v(buildUrl + "/stagingbuild.loader.js");
@@ -290,6 +296,17 @@
           killEl("#unity-progress-bar-empty");
           killEl("#unity-progress-percent");
           killEl("#unity-loading-bar");
+
+          // The backdrop is a LOADING backdrop, so it comes down with the rest of the loading UI.
+          // #unity-container is the FULL VIEWPORT and the canvas is letterboxed inside it, so that
+          // background is also what paints the LETTERBOX BARS — leaving the image set keeps a band
+          // of blurred key art above and below the game for the whole session, with a visible seam
+          // at the canvas edge. killEl() above tears down the spinner, the logo and the progress
+          // bar; nothing else clears the container.
+          // Paired with the #unity-container rule in the <style> block above. Keep this colour
+          // identical to the fallback there and to GROUND in Tools/bake_loading_bg.py.
+          var container = document.querySelector("#unity-container");
+          if (container) container.style.background = "#0e0e12";
 
           resizeCanvas();
 
